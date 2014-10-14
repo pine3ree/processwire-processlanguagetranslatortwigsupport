@@ -50,8 +50,7 @@ All translated files for the choosen language are listed.
 You can edit the belonging phrases by clicking on the file.  
 Furthermore you can add another file to translate by clicking the _Translate another File_ Button.
 
-![Setup Language-Translator](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport/blob/master/screens/language-support.png)
-
+![Setup Language-Translator](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport/blob/master/screens/language-translator.png)
 
 ## Usage TemplateTwigReplaceLanguageSupport
 
