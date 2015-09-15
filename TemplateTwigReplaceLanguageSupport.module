@@ -10,8 +10,8 @@
  *
  *
  * @author Tabea David <td@kf-interactive.com>
- * @version 0.0.1
- * @copyright Copyright (c) 2014 KF Interactive, www.kf-interactive.com, <info@kf-interactive.com>
+ * @version 0.0.3
+ * @copyright Copyright (c) 2015 KF Interactive, www.kf-interactive.com, <info@kf-interactive.com>
  * @see https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport
  * @see http://www.processwire.com
  */
@@ -32,7 +32,7 @@ class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
 
     return array(
       'title' => 'Template Twig Replace Language Support',
-      'version' => 001,
+      'version' => 003,
       'summary' => 'Multi-language support for Twig template engine',
       'href' => 'https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport',
       'singular' => true,
@@ -51,10 +51,21 @@ class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
 
     // new twig function to enable translations
     // @see: http://processwire.com/api/multi-language-support/code-i18n/
-    $function = new Twig_SimpleFunction("__", function ($text, $filename = '', $context = '') {
-      if (!empty($filename) && $this->twig->getLoader()->exists($filename . '.twig')) {
-        $textdomain = $this->twig->getLoader()->getCacheKey($filename . '.twig');
-        return __($text, $textdomain, $context);
+    $function = new Twig_SimpleFunction("__", function ($text, $filename = '_strings', $context = '') {
+      if (!empty($filename)) {
+        // translation inside twig template folders
+        if ($this->twig->getLoader()->exists($filename . '.twig')) {
+
+          $textdomain = $this->twig->getLoader()->getCacheKey($filename . '.twig');
+          return __($text, $textdomain, $context);
+
+        // translation outsite twig template folders
+        // for example: {{ __(name, 'site/modules/ModuleName/Translation') }}
+        } elseif (file_exists($filename . '.php')) {
+          return __($text, $filename . '.php', $context);
+        } elseif (file_exists($filename . '.module')) {
+          return __($text, $filename . '.module', $context);
+        }
       }
     });
 
