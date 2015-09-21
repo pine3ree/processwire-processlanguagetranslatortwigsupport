@@ -9,7 +9,7 @@
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  * @author Tabea David <td@kf-interactive.com>
- * @version 0.0.3
+ * @version 0.0.4
  * @copyright Copyright (c) 2015 KF Interactive, www.kf-interactive.com, <info@kf-interactive.com>
  * @see https://github.com/justonestep/processwire-
  * @see http://www.processwire.com
@@ -31,10 +31,11 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator  {
   public static function getModuleInfo() {
     return array(
       'title' => 'Language Translator Twig Support',
-      'version' => 003,
+      'version' => 004,
       'author' => 'Tabea David',
       'requires' => 'ProcessLanguageTranslator',
       'href' => 'https://github.com/justonestep/processwire- ',
+      'permission' => 'language-edit'
     );
   }
 
@@ -205,10 +206,8 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator  {
     $this->message('url ' . $url);
     $out = '<div style="text-align: right;">' . $this->switchLang('', '4') . '</div>';
 
-    $languageFiles = array(
-      'language_files' => 'Language Files - Core',
-      'language_files_site' => 'Language Files - Site'
-    );
+    $languageFiles = array('language_files_site' => __('Language Files - Site'));
+    if ($this->user->isSuperuser()) $languageFiles['language_files'] = __('Language Files - Core');
 
     foreach ($languageFiles as $fieldName => $fileName) {
       // language_files_site not installed
@@ -217,22 +216,28 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator  {
       }
 
       $table = $this->modules->get("MarkupAdminDataTable");
-      // $table->setCaption($fileName);
       $headline = "<h2>{$fileName}</h2>";
 
       if (count($this->language->$fieldName)) {
         $table->headerRow(array(
-          'file',
-          'phrases',
-          'last modified',
+          __('name'),
+          __('file'),
+          __('phrases'),
+          __('last modified')
         ));
 
         foreach ($this->language->$fieldName as $file) {
           $textdomain = basename($file->basename, '.json');
           $data = $this->translator->getTextdomain($textdomain);
 
+          if (!$this->user->isSuperuser() && !preg_match('/(\.)(php|twig)/', $data['file'])) {
+            $this->translator->unloadTextdomain($textdomain);
+            continue;
+          }
+
           $table->row(array(
-            $data['file'] => $url . "edit/?textdomain=$textdomain",
+            $this->getFilename($data['file']) => $url . "edit/?textdomain=$textdomain",
+            $data['file'],
             count($data['translations']),
             date($this->config->dateFormat, filemtime($file->filename))
           ));
@@ -247,11 +252,13 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator  {
       $out .= $headline . $table->render();
     }
 
-    $btn = $this->modules->get('InputfieldButton');
-    $btn->attr('value', __('Translate another File'));
-    $btn->href = $url . 'add/';
-    $btn->addClass('head_button_clone');
-    $out .= $btn->render() . '<br />';
+    if ($this->user->isSuperuser()) {
+      $btn = $this->modules->get('InputfieldButton');
+      $btn->attr('value', __('Translate another File'));
+      $btn->href = $url . 'add/';
+      $btn->addClass('head_button_clone');
+      $out .= $btn->render() . '<br />';
+    }
 
     $out .= '<br />' . $this->switchLang();
 
@@ -284,9 +291,24 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator  {
   }
 
   /**
-  *
-  * install routine
-  */
+   * get filename
+   *
+   */
+  private function getFilename($word) {
+    $array = explode('/', $word);
+    $filename = end($array);
+    $name = preg_replace('/\..*$/', '', $filename);
+
+    $spaceBeforeCamel = ltrim(preg_replace('/[A-Z]/', ' $0', $name), '_');
+    $spaceInsteadOfUnderscore = preg_replace('/_/', ' ', $spaceBeforeCamel);
+
+    return ucwords($spaceInsteadOfUnderscore);
+  }
+
+  /**
+   *
+   * install routine
+   */
   public function ___install() {
     $p = $this->pages->get("template=admin, name=language-translator");
     $p->status = 21; //change status to visible in admin > setup
@@ -295,10 +317,10 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator  {
   }
 
   /**
-  *
-  * uninstall routine
-  * default settings
-  */
+   *
+   * uninstall routine
+   * default settings
+   */
   public function ___uninstall() {
     $p = $this->pages->get("template=admin, name=language-translator");
     $p->status = 1045; //change status to hidden in admin > setup
