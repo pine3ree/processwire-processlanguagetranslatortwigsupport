@@ -104,3 +104,13 @@ If you need the interface to be translated go to module settings (Language Trans
 
 After activating the checkbox you can translate all the content using the Language Translator. You have to add a translation for ``site/modules/ProcessLanguageTranslatorTwigSupport/ProcessLanguageTranslatorTwigSupport.module``.
 
+
+## Enable the twig Intl Extension
+
+[The Intl Extension](http://twig.sensiolabs.org/doc/extensions/intl.html) provides the **localizeddate**, **localizednumber** and **localizedcurrency** filters.
+
+First of all, you will need the [PHP intl extension](https://secure.php.net/manual/en/book.intl.php), as the Twig extension is built on top of that.
+
+The Twig Intl extension will throw an Exception if the PHP intl extension is not enabled.
+
+Installation instructions can be found in the official PHP documentation. 
