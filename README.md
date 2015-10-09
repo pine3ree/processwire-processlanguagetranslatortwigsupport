@@ -2,6 +2,13 @@
 
 # Process Language Translator Twig Support
 
+- [Installation](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport#installation)
+- [Usage ProcessLanguageTranslatorTwigSupport](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport#usage-processlanguagetranslatortwigsupport)
+- [Usage TemplateTwigReplaceLanguageSupport](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport#usage-templatetwigreplacelanguagesupport)
+- [Often used translations](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport#often-used-translations)
+- [Enable Language Translators for Editors](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport#enable-language-translators-for-editors)
+- [Enable the Twig Intl Extension](https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport#enable-the-twig-intl-extension)
+
 ## Overview:
 
 Extends Language Translator Modul.  
@@ -105,7 +112,7 @@ If you need the interface to be translated go to module settings (Language Trans
 After activating the checkbox you can translate all the content using the Language Translator. You have to add a translation for ``site/modules/ProcessLanguageTranslatorTwigSupport/ProcessLanguageTranslatorTwigSupport.module``.
 
 
-## Enable the twig Intl Extension
+## Enable the Twig Intl Extension
 
 [The Intl Extension](http://twig.sensiolabs.org/doc/extensions/intl.html) provides the **localizeddate**, **localizednumber** and **localizedcurrency** filters.
 
@@ -114,3 +121,5 @@ First of all, you will need the [PHP intl extension](https://secure.php.net/manu
 The Twig Intl extension will throw an Exception if the PHP intl extension is not enabled.
 
 Installation instructions can be found in the official PHP documentation. 
+
+Go to module settings (Template Twig Replace Language Support) and activate the checkbox.
