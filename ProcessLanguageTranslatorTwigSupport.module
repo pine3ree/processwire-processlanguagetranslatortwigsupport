@@ -9,7 +9,7 @@
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  * @author Tabea David <td@kf-interactive.com>
- * @version 0.0.4
+ * @version 0.0.5
  * @copyright Copyright (c) 2015 KF Interactive, www.kf-interactive.com, <info@kf-interactive.com>
  * @see https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport
  * @see http://www.processwire.com
@@ -31,7 +31,7 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator imp
   public static function getModuleInfo() {
     return array(
       'title' => 'Language Translator Twig Support',
-      'version' => 004,
+      'version' => 005,
       'author' => 'Tabea David',
       'requires' => 'ProcessLanguageTranslator',
       'href' => 'https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport ',

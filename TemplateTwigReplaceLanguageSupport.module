@@ -10,7 +10,7 @@
  *
  *
  * @author Tabea David <td@kf-interactive.com>
- * @version 0.0.3
+ * @version 0.0.5
  * @copyright Copyright (c) 2015 KF Interactive, www.kf-interactive.com, <info@kf-interactive.com>
  * @see https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport
  * @see http://www.processwire.com
@@ -19,7 +19,7 @@
 /**
  * Class TemplateTwigReplaceLanguageSupport
  */
-class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
+class TemplateTwigReplaceLanguageSupport extends WireData implements Module, ConfigurableModule {
 
   /**
    * Retrieves module meta data
@@ -29,16 +29,58 @@ class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
    * @see http://processwire.com/apigen/class-Module.html
    */
   public static function getModuleInfo() {
-
     return array(
       'title' => 'Template Twig Replace Language Support',
-      'version' => 003,
+      'version' => 005,
       'summary' => 'Multi-language support for Twig template engine',
       'href' => 'https://github.com/justonestep/processwire-processlanguagetranslatortwigsupport',
       'singular' => true,
       'autoload' => true,
       'requires' => 'TemplateTwigReplace'
     );
+  }
+
+  /**
+   * @field array Default config values
+   */
+  protected static $defaults = array(
+    'intlextension' => 0
+  );
+
+  /**
+   * Retrieves the list of config input fields
+   *
+   * Implementation of the ConfigurableModule interface
+   *
+   * @param array $data The config data
+   * @return InputfieldWrapper
+   * @see http://processwire.com/apigen/class-ConfigurableModule.html
+   */
+  public static function getModuleConfigInputfields(array $data) {
+    $data = array_merge(self::$defaults, $data);
+
+    $fields = new InputfieldWrapper();
+
+    $help = wire('modules')->get('InputfieldMarkup');
+    $helpContent = <<<EOD
+<p>
+<a href="http://twig.sensiolabs.org/doc/extensions/intl.html">The Intl Extension</a> provides the localizeddate, localizednumber and localizedcurrency filters.<br />
+First of all, you will need the <a href="https://secure.php.net/manual/en/book.intl.php">PHP intl extension</a>, as the Twig extension is built on top of that.<br />
+The Twig Intl extension will throw an Exception if the PHP intl extension is not enabled.<br />
+Installation instructions can be found in the official PHP documentation.
+</p>
+EOD;
+    $help->value = $helpContent;
+    $fields->append($help);
+
+    $field = wire('modules')->get('InputfieldCheckbox');
+    $field->label = __('Enable the Intl Extension');
+    $field->attr('name', 'intlextension');
+    $field->attr('value', $data['intlextension'] ? $data['intlextension'] : 0 );
+    $field->attr('checked', $data['intlextension'] === 1 ? 'checked' : '' );
+    $fields->append($field);
+
+    return $fields;
   }
 
   /**
@@ -49,6 +91,14 @@ class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
     // retrieve the Twig_Environment instance
     $this->twig = wire('modules')->get('TemplateTwigReplace')->getTwig();
 
+    $this->addIntlExtension();
+    $this->addTranslationFunction();
+  }
+
+  /*
+   * add function to enable translations
+   */
+  private function addTranslationFunction() {
     // new twig function to enable translations
     // @see: http://processwire.com/api/multi-language-support/code-i18n/
     $function = new Twig_SimpleFunction("__", function ($text, $filename = '_strings', $context = '') {
@@ -59,8 +109,8 @@ class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
           $textdomain = $this->twig->getLoader()->getCacheKey($filename . '.twig');
           return __($text, $textdomain, $context);
 
-        // translation outsite twig template folders
-        // for example: {{ __(name, 'site/modules/ModuleName/Translation') }}
+          // translation outsite twig template folders
+          // for example: {{ __(name, 'site/modules/ModuleName/Translation') }}
         } elseif (file_exists($filename . '.php')) {
           return __($text, $filename . '.php', $context);
         } elseif (file_exists($filename . '.module')) {
@@ -72,5 +122,22 @@ class TemplateTwigReplaceLanguageSupport extends WireData implements Module {
     // add function to twig environment
     $this->twig->addFunction($function);
   }
-}
 
+  /*
+   * add Intl Extension
+   *
+   * The Intl Extension provides the localizeddate, localizednumber and localizedcurrency filters.
+   * First of all, you will need the PHP intl extension, as the Twig extension is built on top of that.
+   * The Twig Intl extension will throw an Exception if the PHP intl extension is not enabled.
+   * Installation instructions can be found in the official PHP documentation.
+   */
+  private function addIntlExtension() {
+    if ($this->intlextension === 1) {
+      if (!class_exists('Twig_Extensions_Extension_Intl')) {
+        require(wire('config')->paths->ProcessLanguageTranslatorTwigSupport . 'vendor/autoload.php');
+      }
+
+      $this->twig->addExtension(new Twig_Extensions_Extension_Intl());
+    }
+  }
+}
