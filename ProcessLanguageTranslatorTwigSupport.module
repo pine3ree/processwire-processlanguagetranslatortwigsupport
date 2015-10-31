@@ -439,8 +439,8 @@ class ProcessLanguageTranslatorTwigSupport extends ProcessLanguageTranslator imp
    */
   public function ___uninstall() {
     $p = $this->pages->get("template=admin, name=language-translator");
-    $p->status = 1045; //change status to hidden in admin > setup
-    $p->process = "ProcessLanguageTranslatorTwigSupport";
+    $p->status = 1040; //change status to hidden in admin > setup
+    $p->process = "ProcessLanguageTranslator";
     $p->save();
   }
 }
